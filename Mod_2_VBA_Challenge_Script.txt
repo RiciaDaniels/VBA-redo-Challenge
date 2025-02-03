@@ -1,0 +1,94 @@
+Sub Ticker():
+    'P1, Collecting the Ticker Symbols
+
+    numrows = Application.CountA(Range("a:a"))
+    Dim Unique As Integer
+
+    Unique = 2
+    For i = 2 To numrows:
+       If Cells(i, 1).Value <> Cells((i - 1), 1).Value Then
+            Cells(Unique, 10).Value = Cells(i, 1).Value
+            Unique = Unique + 1
+        End If
+    Next i
+
+    'P2 Collecting the Opening, Closing, Percent Change and Volume values
+    
+    Dim Open_Price As Double
+    Dim Close_Price As Double
+    Dim Percent_Cng As Double
+    Dim Volume As Double
+    
+    EndDate = WorksheetFunction.Max(Range("b:b"))
+    Volume = 0
+    Unique = 2
+    For i = 2 To numrows:
+        If Cells(i, 2) < Cells((i - 1), 2) Or Cells((i - 1), 2) = vbString Then
+            Open_Price = Cells(i, 3).Value
+            Volume = Volume + Cells(i, 7).Value
+            Open_Date = Cells(i, 2)
+        ElseIf Cells(i, 2).Value = EndDate Then
+     
+            Close_Price = Cells(i, 6).Value
+            
+            'Printing the Data
+            Cells(Unique, 11).Value = (Close_Price - Open_Price)
+            Percent_Cng = (Close_Price - Open_Price) / Open_Price
+            Cells(Unique, 12).Value = Percent_Cng
+            Volume = Volume + Cells(i, 7).Value
+            
+          'Coloring the Cells based on their values
+            Cells(Unique, 13).Value = Volume
+                If Percent_Cng >= 0 Then
+                    Cells(Unique, 11).Interior.Color = vbGreen
+                Else
+                    Cells(Unique, 11).Interior.Color = vbRed
+                End If
+                
+            Unique = Unique + 1
+            Volume = 0
+        Else
+            Volume = Volume + Cells(i, 7).Value
+
+        End If
+    Next i
+    
+    MaxPerc = WorksheetFunction.Max(Range("L:L"))
+    Total_Count = Application.CountA(Range("L:L"))
+    MinPerc = WorksheetFunction.Min(Range("L:L"))
+    Maxvol = WorksheetFunction.Max(Range("M:M"))
+        
+    For i = 2 To Total_Count:
+        If Cells(i, 12).Value = MaxPerc Then
+            MaxRow = Cells(i, 12).Row
+            MaxTicker = Cells(MaxRow, 10)
+            Range("p2").Value = MaxTicker
+            Range("q2").Value = MaxPerc
+            
+        ElseIf Cells(i, 12).Value = MinPerc Then
+            MinRow = Cells(i, 12).Row
+            MinTicker = Cells(MinRow, 10)
+            Range("p3").Value = MinTicker
+            Range("q3").Value = MinPerc
+        End If
+        
+        If Cells(i, 13).Value = Maxvol Then
+            MaxVolRow = Cells(i, 12).Row
+            MaxVolTic = Cells(MaxVolRow, 10)
+            Range("p4").Value = MaxVolTic
+            Range("q4").Value = Maxvol
+        End If
+    Next i
+    
+    Range("L:L").NumberFormat = "0.00%"
+    Range("Q2:Q3").NumberFormat = "0.00%"
+    Range("J1").Value = "Ticker"
+    Range("k1").Value = "Qtr. Change"
+    Range("L1").Value = "% Change"
+    Range("M1").Value = "Total Stock Volume"
+    Range("P1").Value = "Ticker"
+    Range("Q1").Value = "Value"
+    Range("o2").Value = "Greatest % Increase"
+    Range("o3").Value = "Greatest % Decrease"
+    Range("o4").Value = "Greatest Total Volume"
+End Sub
